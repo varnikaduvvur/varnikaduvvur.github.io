@@ -70,11 +70,15 @@ if (contactLabel) {
         <button class="contact-close" type="button" aria-label="Close contact form">×</button>
       </div>
       <form class="contact-form">
+        <input type="hidden" name="access_key" value="5b4259fe-1f91-4316-a8b1-abbbe9697ced">
+        <input type="hidden" name="subject" value="New portfolio enquiry for Varnika Duvvur">
+        <input type="hidden" name="from_name" value="Varnika Duvvur Portfolio">
+        <input class="form-botcheck" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off">
         <div class="contact-field"><label for="contact-name">Your name *</label><input id="contact-name" name="name" autocomplete="name" required placeholder="Name"></div>
         <div class="contact-field"><label for="contact-email">Your email *</label><input id="contact-email" name="email" type="email" autocomplete="email" required placeholder="Email"></div>
         <div class="contact-field message"><label for="contact-message">Your message *</label><textarea id="contact-message" name="message" required placeholder="Tell me about your project, role, or collaboration"></textarea></div>
-        <p class="contact-note">Submitting opens your email app with a formatted message ready to send.</p>
-        <button class="contact-submit" type="submit">Prepare email ↗</button>
+        <p class="contact-note" aria-live="polite">Your message will be delivered directly to Varnika's inbox.</p>
+        <button class="contact-submit" type="submit">Send message ↗</button>
       </form>
     </div>`;
   document.body.append(dialog);
@@ -84,14 +88,30 @@ if (contactLabel) {
   contactButton.addEventListener("click", () => dialog.showModal());
   closeButton.addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
-  contactForm.addEventListener("submit", (event) => {
+  contactForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const data = new FormData(contactForm);
-    const name = data.get("name").trim();
-    const email = data.get("email").trim();
-    const message = data.get("message").trim();
-    const subject = encodeURIComponent(`Portfolio enquiry from ${name}`);
-    const body = encodeURIComponent(`Hi Varnika,\n\n${message}\n\nBest,\n${name}\n${email}`);
-    window.location.href = `mailto:varnikaduvvur1133@gmail.com?subject=${subject}&body=${body}`;
+    const submitButton = contactForm.querySelector(".contact-submit");
+    const status = contactForm.querySelector(".contact-note");
+    submitButton.disabled = true;
+    submitButton.textContent = "Sending…";
+    status.className = "contact-note";
+    status.textContent = "Sending your message securely…";
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: new FormData(contactForm)
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || "Message could not be sent.");
+      contactForm.reset();
+      status.className = "contact-note success";
+      status.textContent = "Thank you — your message has been sent.";
+      submitButton.textContent = "Message sent ✓";
+    } catch (error) {
+      status.className = "contact-note error";
+      status.textContent = "The message could not be sent. Please try again or use the Email link below.";
+      submitButton.disabled = false;
+      submitButton.textContent = "Try again ↗";
+    }
   });
 }
