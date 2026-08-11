@@ -215,23 +215,37 @@ em { font-family: "Playfair Display", Georgia, serif; font-weight: 500; }
   position: relative;
   min-height: 2600px;
   padding: 150px var(--page-pad) 240px;
+  display: grid;
+  grid-template-columns: minmax(330px, 0.75fr) minmax(0, 1.25fr);
+  grid-template-rows: repeat(4, auto);
+  column-gap: clamp(54px, 7vw, 140px);
+  row-gap: 150px;
+  align-items: start;
+  overflow: clip;
   background:
     radial-gradient(rgba(23, 32, 27, 0.12) 0.8px, transparent 0.8px) 0 0 / 22px 22px,
     var(--paper);
 }
 .floating-work::before { content: "02"; position: absolute; right: 4vw; top: 90px; color: rgba(25, 60, 49, 0.07); font: italic 500 180px / 1 "Playfair Display", Georgia, serif; }
-.floating-intro { position: static; width: min(42vw, 620px); }
+.floating-intro {
+  position: sticky;
+  top: calc(var(--nav-h) + 48px);
+  grid-column: 1;
+  grid-row: 1 / 5;
+  width: 100%;
+  z-index: 4;
+}
 .floating-intro h2 { margin: 25px 0 30px; font: 500 clamp(68px, 8vw, 130px) / 0.78 "Playfair Display", Georgia, serif; letter-spacing: -0.055em; }
 .floating-intro h2 em { color: var(--forest); }
 .floating-intro > p:last-child { max-width: 390px; padding-left: 64px; border-left: 1px solid var(--coral); font: 300 16px / 1.65 "Manrope", sans-serif; }
-.float-card { position: absolute; z-index: 3; display: block; padding: 12px 12px 18px; background: #f9f6ef; box-shadow: 0 22px 55px rgba(23, 32, 27, 0.18); transition: box-shadow 0.3s ease; }
+.float-card { position: relative; z-index: 3; display: block; padding: 12px 12px 18px; background: #f9f6ef; box-shadow: 0 22px 55px rgba(23, 32, 27, 0.18); transition: box-shadow 0.3s ease; }
 .float-card:hover { box-shadow: 0 30px 70px rgba(23, 32, 27, 0.28); }
 .float-card img { width: 100%; aspect-ratio: 1.45; object-fit: cover; }
 .float-card span { display: block; padding: 15px 2px 0; color: rgba(23, 32, 27, 0.72); font-size: 9px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; }
-.float-card-a { width: min(43vw, 690px); top: 250px; right: 5vw; }
-.float-card-b { width: min(36vw, 570px); top: 940px; left: 8vw; }
-.float-card-c { width: min(44vw, 710px); top: 1370px; right: 6vw; }
-.float-card-d { width: min(40vw, 650px); top: 2030px; left: 20vw; }
+.float-card-a { grid-column: 2; grid-row: 1; width: min(100%, 720px); justify-self: start; }
+.float-card-b { grid-column: 2; grid-row: 2; width: min(88%, 620px); justify-self: end; }
+.float-card-c { grid-column: 2; grid-row: 3; width: min(100%, 740px); justify-self: start; }
+.float-card-d { grid-column: 2; grid-row: 4; width: min(92%, 680px); justify-self: end; }
 
 .home-closing { min-height: 80vh; padding: 130px var(--page-pad); display: grid; align-content: center; background: var(--forest); color: var(--paper); position: relative; overflow: hidden; }
 .home-closing::after { content: "04"; position: absolute; right: 4vw; bottom: -60px; color: rgba(244, 240, 230, 0.045); font: italic 500 330px / 1 "Playfair Display", Georgia, serif; }
@@ -398,9 +412,9 @@ em { font-family: "Playfair Display", Georgia, serif; font-weight: 500; }
   .home-statement { border-color: var(--coral); }
   .featured-link { width: min(310px, calc(100% - 2 * var(--page-pad))); right: var(--page-pad); bottom: 92px; }
   .scroll-mark { display: none; }
-  .floating-work { min-height: auto; padding-top: 100px; display: grid; gap: 38px; }
-  .floating-intro { position: relative; top: auto; width: 100%; margin-bottom: 30px; }
-  .float-card { position: relative; inset: auto; width: 100%; transform: none !important; }
+  .floating-work { min-height: auto; padding-top: 100px; display: grid; grid-template-columns: 1fr; grid-template-rows: auto; gap: 38px; overflow: hidden; }
+  .floating-intro { position: relative; top: auto; grid-column: 1; grid-row: auto; width: 100%; margin-bottom: 30px; }
+  .float-card, .float-card-a, .float-card-b, .float-card-c, .float-card-d { position: relative; inset: auto; grid-column: 1; grid-row: auto; width: 100%; justify-self: stretch; transform: none !important; }
   .home-closing { min-height: 70vh; }
 
   .projects-main { height: auto; min-height: calc(100svh - var(--contact-h)); grid-template-columns: 1fr; }
