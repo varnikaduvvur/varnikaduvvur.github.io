@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>Varnika Duvvur — Architecture Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eeeade;
+    --ink:#151713;
+    --forest:#28362f;
+    --sage:#8fa295;
+    --line: rgba(21,23,19,.22);
+    --pad: 56px;
+    --pw: 11in;
+    --ph: 8.5in;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#3a3a36;}
+  body{font-family:'DM Sans',sans-serif;color:var(--ink);}
+
+  .eyebrow{
+    font-family:'DM Sans',sans-serif;
+    font-size:10.5px;
+    font-weight:500;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--forest);
+  }
+  .display{
+    font-family:'Manrope',sans-serif;
+    font-weight:300;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+
+  /* ---- page shell ---- */
+  .book{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:28px;
+    padding:40px 0 80px;
+  }
+  .page{
+    position:relative;
+    width:var(--pw);
+    height:var(--ph);
+    background:var(--paper);
+    box-shadow:0 6px 24px rgba(0,0,0,.35);
+    overflow:hidden;
+    flex:none;
+  }
+  .page.dark{ background:var(--forest); color:var(--paper); }
+
+  .runhead, .runfoot{
+    position:absolute;
+    left:var(--pad);
+    right:var(--pad);
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .runhead{ top:34px; }
+  .runfoot{ bottom:34px; }
+  .runhead::after, .runfoot::before{ content:""; }
+  .runhead-line, .runfoot-line{
+    position:absolute;
+    left:var(--pad); right:var(--pad);
+    height:1px; background:var(--line);
+  }
+  .runhead-line{ top:58px; }
+  .runfoot-line{ bottom:58px; }
+  .rl, .rr{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); opacity:.62; }
+  .page.dark .rl, .page.dark .rr{ color:var(--paper); }
+
+  .content{
+    position:absolute;
+    left:var(--pad); right:var(--pad);
+    top:88px; bottom:78px;
+  }
+
+  /* ---- cover ---- */
+  .cover .content{
+    top:0; bottom:0;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .cover .eyebrow{ margin-bottom:26px; }
+  .cover h1{
+    font-size:104px; line-height:.96; font-weight:300;
+  }
+  .cover .tagline{
+    margin-top:26px; max-width:460px;
+    font-size:16px; line-height:1.55; color:var(--forest);
+  }
+  .cover-foot{
+    position:absolute; left:var(--pad); right:var(--pad); bottom:40px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); opacity:.7;
+  }
+
+  /* ---- about ---- */
+  .about-grid{ display:grid; grid-template-columns:220px 1fr; gap:56px; height:100%; }
+  .portrait{ width:220px; height:280px; object-fit:cover; }
+  .about-name{ margin-top:18px; font-size:19px; font-weight:500; letter-spacing:.02em; }
+  .about-intro h2{ font-size:40px; font-weight:300; line-height:1.12; max-width:460px; margin-bottom:22px; font-family:'Manrope',sans-serif; }
+  .about-intro p{ font-size:13px; line-height:1.65; max-width:480px; margin-bottom:12px; color:var(--ink); }
+  .about-cols{ margin-top:30px; display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .about-cols h3{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--forest); margin-bottom:10px; font-weight:600; }
+  .about-cols .item{ font-size:12.5px; line-height:1.55; margin-bottom:12px; }
+  .about-cols .item b{ display:block; font-weight:500; }
+  .about-cols .item span{ color:var(--ink); opacity:.65; font-size:11.5px; }
+
+  /* ---- toc ---- */
+  .toc h2{ font-size:38px; font-weight:300; font-family:'Manrope',sans-serif; margin-bottom:28px; }
+  .toc-row{
+    display:flex; align-items:baseline; gap:18px;
+    padding:13px 0; border-bottom:1px solid var(--line);
+  }
+  .toc-num{ font-family:'Manrope',sans-serif; font-weight:300; font-size:22px; width:40px; color:var(--forest); }
+  .toc-title{ font-size:19px; font-weight:400; flex:1; }
+  .toc-meta{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; opacity:.6; width:220px; }
+  .toc-dots{ flex:none; width:120px; border-bottom:1px dotted var(--line); position:relative; top:-5px; }
+  .toc-page{ font-size:12px; opacity:.7; width:30px; text-align:right; }
+
+  /* ---- project opener ---- */
+  .opener .content{ display:grid; grid-template-columns:360px 1fr; gap:50px; align-items:center; }
+  .opener .eyebrow{ margin-bottom:16px; }
+  .opener h2{ font-size:44px; line-height:1.04; font-weight:300; font-family:'Manrope',sans-serif; margin-bottom:20px; }
+  .opener .meta{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; line-height:1.9; opacity:.75; margin-bottom:22px; }
+  .opener .statement{ font-size:13px; line-height:1.7; max-width:340px; }
+  .opener .hero-frame{ height:100%; display:flex; align-items:center; justify-content:center; }
+  .opener .hero-frame img{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; }
+
+  /* ---- detail page ---- */
+  .detail .content{ display:flex; flex-direction:column; }
+  .detail .img-frame{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; }
+  .detail .img-frame img{ max-width:100%; max-height:100%; object-fit:contain; mix-blend-mode:multiply; }
+  .detail .caption{ display:flex; justify-content:space-between; align-items:flex-end; padding-top:14px; }
+  .detail .cap-num{ font-family:'Manrope',sans-serif; font-weight:300; font-size:26px; color:var(--forest); margin-right:14px; }
+  .detail .cap-label{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:500; }
+  .detail .cap-row{ display:flex; align-items:baseline; }
+  .detail .cap-quote{ max-width:360px; font-family:'Manrope',sans-serif; font-weight:300; font-size:18px; line-height:1.3; text-align:right; }
+  .detail .cap-desc{ max-width:520px; font-size:11.5px; line-height:1.6; opacity:.75; margin-top:6px; }
+
+  /* ---- decorative system ---- */
+  .dotgrid{
+    background-image: radial-gradient(var(--line) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: -4px -4px;
+  }
+  .regmarks{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .regmarks path{ stroke:var(--ink); stroke-width:1; opacity:.32; fill:none; }
+  .regmarks circle{ fill:var(--ink); opacity:.32; }
+  .page.dark .regmarks path{ stroke:var(--paper); }
+  .page.dark .regmarks circle{ fill:var(--paper); }
+
+  .cover-art{ position:absolute; top:0; right:0; width:62%; height:100%; pointer-events:none; }
+  .cover-art .ribbon{ stroke:var(--forest); fill:none; stroke-width:1.1; opacity:.5; }
+  .cover-art .ribbon.alt{ stroke:var(--sage); opacity:.65; }
+  .cover-art .axis{ stroke:var(--line); stroke-width:1; }
+  .cover-art .tick{ stroke:var(--ink); stroke-width:1; opacity:.4; }
+  .cover-art .node{ fill:var(--forest); opacity:.55; }
+  .cover-signature{
+    position:absolute; left:var(--pad); bottom:104px;
+    font-family:'Manrope',sans-serif; font-style:italic; font-weight:400;
+    font-size:13px; color:var(--forest); opacity:.8; letter-spacing:.02em;
+  }
+
+  .scalebar{ display:flex; align-items:center; gap:0; margin-top:6px; opacity:.7; }
+  .scalebar svg{ display:block; }
+  .scalebar-label{ font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; margin-left:10px; opacity:.75; }
+
+  .toc-strip{ display:flex; align-items:flex-end; gap:38px; margin-bottom:34px; }
+  .toc-pill{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .toc-pill .pnum{ font-family:'Manrope',sans-serif; font-weight:300; font-size:16px; color:var(--forest); }
+  .toc-pill .pimg{
+    width:76px; height:150px; border-radius:38px; overflow:hidden;
+    border:1px solid var(--line); background:#e4e0d2;
+  }
+  .toc-pill.tall .pimg{ height:186px; border-radius:44px; }
+  .toc-pill .pimg img{ width:100%; height:100%; object-fit:cover; }
+  .toc-pill .plabel{ font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; opacity:.65; text-align:center; max-width:90px; }
+  .toc-timeline{ position:relative; height:1px; background:var(--line); margin-bottom:40px; }
+
+  /* ---- wide panoramic opener variant ---- */
+  .opener.wide-hero .content{ display:flex; flex-direction:column; }
+  .opener.wide-hero .wide-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:40px; margin-bottom:16px; }
+  .opener.wide-hero .wide-head h2{ margin-bottom:0; }
+  .opener.wide-hero .wide-meta-block{ flex:none; padding-top:8px; }
+  .opener.wide-hero .statement{ max-width:760px; margin-bottom:18px; }
+  .opener.wide-hero .hero-frame.wide{ flex:1; display:flex; align-items:center; justify-content:center; padding:0; }
+  .opener.wide-hero .hero-frame.wide img{ width:100%; height:auto; max-height:100%; object-fit:contain; }
+
+  /* ---- two-panel labeled diagram layout ---- */
+  .content.two-panel{ display:flex; flex-direction:column; gap:16px; }
+  .panel-label{ font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.6; margin-bottom:6px; }
+  .panel-img{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; }
+  .panel-img img{ max-width:100%; max-height:100%; object-fit:contain; mix-blend-mode:multiply; }
+  .two-panel > .panel{ flex:1.35; display:flex; flex-direction:column; min-height:0; }
+  .panel-row{ display:flex; gap:28px; flex:1; min-height:0; }
+  .panel-row .panel{ flex:1; display:flex; flex-direction:column; min-height:0; }
+  .panel-row .panel.small{ flex:0.62; }
+
+  .reflect{
+    display:flex; align-items:baseline; gap:12px; padding-top:14px; margin-top:auto;
+  }
+  .reflect .mark{ font-family:'Manrope',sans-serif; font-weight:300; font-size:20px; color:var(--sage); }
+  .reflect p{
+    font-family:'Manrope',sans-serif; font-weight:300; font-style:italic; font-size:15px;
+    color:var(--forest); line-height:1.4; max-width:640px;
+  }
+
+  /* 2026 EDITORIAL REDESIGN — quiet technical pages, expressive chapter moments */
+  :root{
+    --paper:#f4f0e6;
+    --ink:#17201b;
+    --forest:#193c31;
+    --sage:#8ea98d;
+    --ochre:#d89b43;
+    --coral:#d76044;
+    --blue:#315f73;
+    --line:rgba(23,32,27,.18);
+  }
+  html{scroll-behavior:smooth;}
+  body{background:radial-gradient(circle at 50% 0,#59605b 0,#282b29 64%);}
+  .book{gap:42px;padding:54px 0 100px;}
+  .page{box-shadow:0 18px 58px rgba(0,0,0,.34),0 1px 0 rgba(255,255,255,.3) inset;}
+  .display,.opener h2,.about-intro h2,.toc h2{font-family:'Playfair Display',Georgia,serif;}
+  .eyebrow{font-weight:600;letter-spacing:.2em;}
+  .runhead-line,.runfoot-line{opacity:.66;}
+  .runhead .rr,.runfoot .rr{font-variant-numeric:tabular-nums;}
+
+  .cover{background:#e8ddc9;isolation:isolate;}
+  .cover::before{content:"";position:absolute;inset:0 0 0 61%;background:var(--forest);z-index:0;}
+  .cover::after{content:"ARCH / 26";position:absolute;right:25px;top:50%;transform:translateY(-50%) rotate(90deg);color:#e8ddc9;font-size:9px;letter-spacing:.38em;z-index:8;}
+  .cover .content{z-index:5;width:58%;justify-content:flex-start;padding-top:190px;}
+  .cover h1{font-size:116px;line-height:.76;letter-spacing:-.06em;position:relative;z-index:5;}
+  .cover h1::first-line{font-style:italic;color:var(--forest);}
+  .cover .tagline{width:400px;margin-top:44px;padding-left:68px;border-left:1px solid rgba(23,32,27,.38);font-size:13px;line-height:1.65;}
+  .cover .eyebrow{position:absolute;top:102px;left:0;}
+  .cover-art{z-index:4;width:62%;opacity:.58;mix-blend-mode:multiply;}
+  .cover-hero{position:absolute;z-index:1;right:38px;top:64px;width:512px;height:646px;object-fit:cover;object-position:center;clip-path:ellipse(36% 49% at 55% 50%);filter:saturate(.84) contrast(1.1);}
+  .cover-orbit{position:absolute;z-index:2;right:98px;top:71px;width:338px;height:631px;border:2px solid var(--coral);border-radius:50%;transform:rotate(7deg);opacity:.92;}
+  .cover-orbit::before{content:"";position:absolute;left:26px;top:-9px;width:9px;height:9px;border-radius:50%;background:var(--ochre);box-shadow:276px 566px 0 var(--sage);}
+  .cover-ghost{position:absolute;z-index:1;right:-14px;bottom:36px;font:italic 500 108px/.82 'Playfair Display',serif;letter-spacing:-.06em;color:rgba(244,240,230,.055);writing-mode:vertical-rl;transform:rotate(180deg);pointer-events:none;}
+  .cover-year{position:absolute;z-index:7;right:73px;top:49px;width:84px;height:84px;border-radius:50%;background:var(--coral);color:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(23,32,27,.18);}
+  .cover-year span{font-size:8px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;margin-left:.22em;}
+  .cover-year strong{font:italic 500 34px/.9 'Playfair Display',serif;}
+  .cover-disciplines{position:absolute;z-index:7;left:var(--pad);top:62px;font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--forest);}
+  .cover-edition{position:absolute;z-index:7;left:var(--pad);top:82px;width:212px;height:1px;background:var(--coral);}
+  .cover-edition::after{content:"SELECTED WORK / NJIT";position:absolute;left:225px;top:-5px;white-space:nowrap;font-size:8px;letter-spacing:.18em;color:rgba(23,32,27,.6);}
+  .cover-projects{position:absolute;z-index:7;left:var(--pad);bottom:82px;width:515px;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;border-top:1px solid rgba(23,32,27,.32);padding-top:12px;}
+  .cover-projects span{font-size:8.5px;line-height:1.35;letter-spacing:.08em;text-transform:uppercase;color:rgba(23,32,27,.68);}
+  .cover-projects b{display:block;font:italic 500 17px/1 'Playfair Display',serif;color:var(--coral);margin-bottom:5px;}
+  .cover-projects span:nth-child(2) b{color:var(--ochre);}.cover-projects span:nth-child(3) b{color:#59765c;}.cover-projects span:nth-child(4) b{color:var(--blue);}
+  .cover-signature{z-index:7;bottom:48px;}
+  .cover-foot{z-index:7;right:56px;bottom:39px;opacity:1;}
+  .cover-foot span:first-child{margin-left:610px;color:#fffaf0;font-weight:600;letter-spacing:.12em;text-shadow:0 1px 8px rgba(0,0,0,.18);}
+  .cover-foot span:last-child{color:#f4f0e6;max-width:210px;text-align:right;}
+
+  .about::before{content:"02";position:absolute;right:46px;top:64px;font:italic 500 92px/1 'Playfair Display',serif;color:rgba(25,60,49,.08);}
+  .about-grid{grid-template-columns:250px 1fr;gap:48px;}
+  .portrait{width:250px;height:360px;clip-path:polygon(0 0,100% 0,100% 88%,82% 100%,0 100%);filter:saturate(.72) contrast(1.04);}
+  .about-name{font-family:'Playfair Display',serif;font-size:24px;}
+  .about-intro h2{font-size:43px;line-height:1.02;max-width:560px;color:var(--forest);}
+  .about-cols{padding-top:18px;border-top:1px solid var(--line);gap:22px;}
+
+  .page.toc{height:var(--ph);background:#efe8db;isolation:isolate;}
+  .page.toc::before{content:"";position:absolute;inset:0 0 0 73%;background:var(--forest);z-index:0;}
+  .page.toc::after{content:"INDEX / 03";position:absolute;right:27px;top:50%;transform:translateY(-50%) rotate(90deg);font-size:8px;letter-spacing:.3em;color:rgba(244,240,230,.68);z-index:4;}
+  .page.toc .runhead,.page.toc .runfoot,.page.toc .runhead-line,.page.toc .runfoot-line{z-index:5;}
+  .page.toc .runhead .rr,.page.toc .runfoot .rr{color:var(--paper);}
+  .page.toc .content{z-index:2;}
+  .toc{height:100%;position:relative;}
+  .toc h2{font-size:72px;line-height:.88;margin-bottom:15px;letter-spacing:-.045em;color:var(--forest);}
+  .toc-deck{width:330px;font-size:12.5px;line-height:1.55;color:rgba(23,32,27,.72);}
+  .toc-deck em{font-family:'Playfair Display',serif;color:var(--coral);font-size:16px;}
+  .toc-strip{position:absolute;right:-9px;top:-30px;gap:9px;z-index:3;align-items:flex-start;}
+  .toc-pill{gap:7px;}
+  .toc-pill:nth-child(2),.toc-pill:nth-child(4){margin-top:39px;}
+  .toc-pill .pnum{color:var(--paper);font:italic 500 16px/1 'Playfair Display',serif;}
+  .toc-pill:first-child .pnum{color:var(--coral);}
+  .toc-pill .pimg{width:65px;height:142px;border-radius:34px 34px 6px 6px;clip-path:none;border:1px solid rgba(244,240,230,.46);padding:3px;background:transparent;}
+  .toc-pill.tall .pimg{height:178px;border-radius:34px 34px 6px 6px;}
+  .toc-pill .pimg img{border-radius:29px 29px 3px 3px;filter:saturate(.82) contrast(1.06);}
+  .toc-pill .plabel{color:rgba(244,240,230,.74);font-size:7px;max-width:66px;}
+  .toc-timeline{margin-top:92px;width:71%;background:linear-gradient(90deg,var(--coral),var(--ochre),var(--sage),var(--blue));height:4px;position:relative;}
+  .toc-timeline::after{content:"4 PROJECTS / 24 STUDIES";position:absolute;right:0;top:12px;font-size:8px;letter-spacing:.18em;color:rgba(23,32,27,.52);}
+  .toc-row{width:71%;padding:15px 0;transition:padding .2s ease;position:relative;z-index:2;}
+  .toc-num{font-family:'Playfair Display',serif;font-style:italic;color:var(--coral);}
+  .toc-row:nth-of-type(2) .toc-num{color:var(--ochre);}.toc-row:nth-of-type(3) .toc-num{color:var(--sage);}.toc-row:nth-of-type(4) .toc-num{color:var(--blue);}
+  .toc-row .toc-title{font-family:'Playfair Display',serif;font-size:20px;}
+  .toc-row .toc-meta{width:170px;font-size:8.5px;}
+  .toc-row .toc-dots{width:44px;}
+  .toc-art{position:absolute;right:-11px;bottom:-20px;width:312px;height:270px;z-index:1;pointer-events:none;}
+  .toc-art .contour{fill:none;stroke:rgba(244,240,230,.22);stroke-width:1.1;}
+  .toc-art .accent{fill:none;stroke:var(--coral);stroke-width:1.5;}
+  .toc-art .wash{fill:rgba(142,169,141,.17);}
+  .toc-artwork{position:absolute;right:-8px;bottom:-2px;width:260px;height:242px;z-index:4;}
+  .toc-artwork figure{position:absolute;overflow:hidden;border:1px solid rgba(244,240,230,.58);box-shadow:0 10px 24px rgba(10,24,20,.22);background:#d8d0c2;}
+  .toc-artwork figure:nth-child(1){left:4px;top:68px;width:84px;height:156px;border-radius:42px 42px 5px 5px;transform:rotate(-4deg);}
+  .toc-artwork figure:nth-child(2){left:78px;top:14px;width:98px;height:188px;border-radius:49px 49px 5px 5px;transform:rotate(3deg);}
+  .toc-artwork figure:nth-child(3){left:165px;top:82px;width:82px;height:142px;border-radius:41px 41px 5px 5px;transform:rotate(-2deg);}
+  .toc-artwork img{width:100%;height:100%;object-fit:cover;filter:saturate(.94) contrast(1.05);}
+  .toc-artwork::after{content:"PERSONAL ARTWORK";position:absolute;right:8px;top:-9px;font-size:7px;letter-spacing:.18em;color:rgba(244,240,230,.65);}
+
+  .end-page{background:var(--forest);color:var(--paper);isolation:isolate;}
+  .end-page::before{content:"";position:absolute;inset:0 59% 0 0;background:#e8ddc9;z-index:0;}
+  .end-page::after{content:"28 / END";position:absolute;right:27px;top:50%;transform:translateY(-50%) rotate(90deg);font-size:8px;letter-spacing:.34em;color:rgba(244,240,230,.62);z-index:6;}
+  .end-gallery{position:absolute;z-index:2;left:54px;top:68px;width:430px;height:675px;}
+  .end-gallery figure{position:absolute;overflow:hidden;border:1px solid rgba(25,60,49,.24);background:#d9d2c5;box-shadow:0 12px 34px rgba(23,32,27,.12);}
+  .end-gallery figure:nth-child(1){left:0;top:76px;width:132px;height:390px;border-radius:66px 66px 8px 8px;}
+  .end-gallery figure:nth-child(2){left:142px;top:0;width:122px;height:482px;border-radius:61px 61px 8px 8px;}
+  .end-gallery figure:nth-child(3){left:274px;top:112px;width:108px;height:350px;border-radius:54px 54px 8px 8px;}
+  .end-gallery figure:nth-child(4){left:98px;top:502px;width:246px;height:116px;border-radius:8px 58px 58px 8px;}
+  .end-gallery img{width:100%;height:100%;object-fit:cover;filter:saturate(1.03) contrast(1.05);}
+  .end-gallery figure:nth-child(4) img{object-position:center 58%;}
+  .end-art-label{position:absolute;z-index:5;left:76px;bottom:40px;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(25,60,49,.65);}
+  .end-copy{position:absolute;z-index:4;left:510px;right:74px;top:124px;bottom:92px;display:flex;flex-direction:column;}
+  .end-kicker{font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--ochre);}
+  .end-copy h2{font:500 90px/.78 'Playfair Display',serif;letter-spacing:-.055em;margin-top:74px;color:var(--paper);}
+  .end-copy h2 em{font-weight:500;color:var(--coral);}
+  .end-note{font:italic 500 19px/1.45 'Playfair Display',serif;max-width:370px;margin-top:48px;color:rgba(244,240,230,.8);}
+  .end-contact{margin-top:auto;padding-top:18px;border-top:1px solid rgba(244,240,230,.34);display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;line-height:1.6;color:rgba(244,240,230,.68);}
+  .end-contact strong{display:block;font-size:11px;color:var(--paper);letter-spacing:.08em;text-transform:none;margin-bottom:3px;}
+  .end-art{position:absolute;z-index:3;inset:0;width:100%;height:100%;pointer-events:none;}
+  .end-art path{fill:none;stroke:rgba(244,240,230,.16);stroke-width:1;}
+  .end-art .accent{stroke:var(--coral);stroke-width:1.6;}
+
+  .opener{--accent:var(--coral);background:linear-gradient(110deg,var(--paper) 0 43%,#e7ddd1 43% 100%);}
+  .opener:nth-of-type(10){--accent:var(--ochre);background:linear-gradient(110deg,var(--paper) 0 43%,#e5dfca 43% 100%);}
+  .opener:nth-of-type(16){--accent:#59765c;background:linear-gradient(110deg,var(--paper) 0 43%,#dce1d4 43% 100%);}
+  .opener:nth-of-type(21){--accent:var(--blue);background:linear-gradient(110deg,var(--paper) 0 43%,#d7e0e2 43% 100%);}
+  .opener::before{content:"";position:absolute;left:0;top:0;width:9px;height:100%;background:var(--accent);}
+  .opener::after{content:"";position:absolute;width:260px;height:260px;border:1px solid var(--accent);border-radius:50%;left:238px;top:-118px;opacity:.42;}
+  .opener .content{grid-template-columns:355px 1fr;gap:42px;}
+  .opener h2{font-size:55px;line-height:.94;letter-spacing:-.03em;color:var(--forest);}
+  .opener .eyebrow{color:var(--accent);}
+  .opener .statement{border-top:1px solid var(--accent);padding-top:18px;margin-top:20px;}
+  .opener .hero-frame img{filter:saturate(.8) contrast(1.03);}
+  .opener.wide-hero{background:linear-gradient(180deg,var(--paper) 0 44%,#e5dfca 44% 100%);}
+  .opener.wide-hero .statement{margin-top:0;}
+
+  .detail:nth-of-type(6n+1){background:#f0eadf;}
+  .detail .img-frame{position:relative;}
+  .detail .img-frame::after{content:"";position:absolute;inset:12px;border:1px solid rgba(23,32,27,.08);pointer-events:none;}
+  .detail .caption{border-top:1px solid var(--line);margin-top:12px;}
+  .detail .cap-num{font-family:'Playfair Display',serif;font-style:italic;color:var(--coral);font-size:30px;}
+  .detail .cap-label{font-weight:600;letter-spacing:.16em;}
+
+  @media screen and (max-width:1100px){
+    :root{--pw:calc(100vw - 32px);--ph:calc((100vw - 32px) * .7727);--pad:5.3vw;}
+    .book{padding-top:16px;gap:18px;}
+    .page{transform-origin:top center;}
+  }
+
+  @media print{
+    html,body{ background:#fff; }
+    .book{ padding:0; gap:0; }
+    .page{ box-shadow:none; page-break-after:always; }
+    @page{ size:11in 8.5in; margin:0; }
+  }
+</style>
+</head>
+<body>
+<div class="book">
+
+  <!-- 1 : COVER -->
+  <section class="page cover dotgrid" id="cover">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <svg class="cover-art" viewBox="0 0 655 816" preserveAspectRatio="xMidYMid meet">
+      <line class="axis" x1="480" y1="0" x2="480" y2="816"/>
+      <line class="axis" x1="0" y1="120" x2="655" y2="120"/>
+      <path class="tick" d="M470,120 L490,120 M480,110 L480,130"/>
+      <circle class="node" cx="480" cy="120" r="3"/>
+      <path class="ribbon" d="M120,60 C260,110 200,240 340,280 C480,320 420,440 560,470 C620,485 600,540 560,560"/>
+      <path class="ribbon alt" d="M90,140 C230,170 190,300 330,330 C470,360 410,470 540,500"/>
+      <path class="ribbon" d="M150,600 C260,560 300,650 420,630 C500,616 520,680 610,700" opacity=".35"/>
+      <circle class="node" cx="120" cy="60" r="3"/>
+      <circle class="node" cx="560" cy="560" r="2.4"/>
+      <path class="tick" d="M40,700 L64,700 M52,688 L52,712"/>
+      <circle class="node" cx="52" cy="700" r="2.2"/>
+    </svg>
+    <div class="cover-disciplines">Architecture / Urbanism / Adaptive Reuse</div>
+    <div class="cover-edition"></div>
+    <div class="cover-orbit" aria-hidden="true"></div>
+    <div class="cover-ghost" aria-hidden="true">PORTFOLIO</div>
+    <div class="cover-year"><span>Edition</span><strong>26</strong></div>
+    <img class="cover-hero" src="assets/enhanced/heroes_terra-ai.png" alt="Terra Hotel architectural rendering">
+    <div class="cover-signature">Varnika Duvvur, 2026</div>
+    <div class="content">
+      <div class="eyebrow">Selected Architecture Portfolio</div>
+      <h1 class="display">Varnika<br>Duvvur</h1>
+      <div class="tagline">Architecture shaped by ecology, memory, and change. Selected work across hospitality, landscape, adaptive reuse, and flexible public space.</div>
+    </div>
+    <div class="cover-projects" aria-label="Featured projects">
+      <span><b>01</b>Terra Hotel</span>
+      <span><b>02</b>Liberty Rail Gardens</span>
+      <span><b>03</b>Branch Brook Gallery</span>
+      <span><b>04</b>Flexible Spaces at MASP</span>
+    </div>
+    <div class="cover-foot">
+      <span>2021 / 2026</span>
+      <span>B.Arch / New Jersey Institute of Technology</span>
+    </div>
+  </section>
+
+  <!-- 2 : ABOUT -->
+  <section class="page about dotgrid">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Architecture Portfolio</span></div>
+    <div class="content">
+      <div class="about-grid">
+        <div>
+          <img class="portrait" src="assets/enhanced/portrait-ai.png" alt="Portrait of Varnika Duvvur">
+          <div class="about-name">Varnika Duvvur</div>
+          <div style="font-size:11px;opacity:.65;margin-top:4px;">varnikaduvvur1133@gmail.com</div>
+        </div>
+        <div>
+          <div class="about-intro">
+            <div class="eyebrow" style="margin-bottom:14px;">About</div>
+            <h2>Designing with memory and responsibility.</h2>
+            <p>I am a May 2026 Bachelor of Architecture graduate from the New Jersey Institute of Technology, seeking a full-time role in architecture or construction.</p>
+            <p>My work moves across the full design pipeline—from computational modeling to production-ready construction documentation—with a focus on adaptive reuse, urban regeneration, and socially responsive design.</p>
+            <p>I combine technical rigor with site history, environmental analysis, and narrative to create architecture that is functional, meaningful, and open to change.</p>
+          </div>
+          <div class="about-cols">
+            <div>
+              <h3>Education</h3>
+              <div class="item"><b>Bachelor of Architecture</b><span>New Jersey Institute of Technology, May 2026</span></div>
+              <div class="item"><span>Coursework: Structural Systems, Building Technology, Construction Documentation, MEP Systems, BIM Integration, Urban Design, Adaptive Reuse</span></div>
+            </div>
+            <div>
+              <h3>Experience</h3>
+              <div class="item"><b>Architectural Researcher &amp; Archivist</b><span>Paul Rudolph Institute · Jun 2025—Present</span></div>
+              <div class="item"><b>Architectural Intern</b><span>Peter Coffin Studio · Sep—Dec 2025</span></div>
+              <div class="item"><b>Architectural Intern, Dubai</b><span>Specialty Structures USA · Jun—Aug 2021</span></div>
+            </div>
+            <div>
+              <h3>Skills</h3>
+              <div class="item"><b>BIM + CAD</b><span>Revit, AutoCAD, construction drawings, wall details</span></div>
+              <div class="item"><b>Design + Visualization</b><span>Rhino, Grasshopper, SketchUp, Lumion, V-Ray, Stable Diffusion, QGIS</span></div>
+              <div class="item"><b>Certifications</b><span>Harvard Architecture, AutoCAD, Revit, Rhino/Grasshopper, Lumion, LEED GA (IP)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">About</span><span class="rr">02</span></div>
+  </section>
+
+  <!-- 3 : CONTENTS -->
+  <section class="page toc" id="contents">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Architecture Portfolio</span></div>
+    <div class="content">
+      <div class="toc">
+        <h2 class="display">Contents</h2>
+        <p class="toc-deck"><em>Four investigations.</em> One evolving practice grounded in environmental responsibility, cultural memory, and adaptable systems.</p>
+        <div class="toc-strip">
+          <div class="toc-pill"><span class="pnum">01</span><span class="pimg"><img src="assets/enhanced/heroes_terra-ai.png" alt=""></span><span class="plabel">The Terra Hotel</span></div>
+          <div class="toc-pill tall"><span class="pnum">02</span><span class="pimg"><img src="assets/enhanced/heroes_liberty-photo-ai.png" alt=""></span><span class="plabel">Liberty Rail Gardens</span></div>
+          <div class="toc-pill"><span class="pnum">03</span><span class="pimg"><img src="assets/enhanced/heroes_branch-ai.png" alt=""></span><span class="plabel">Branch Brook Park Gallery</span></div>
+          <div class="toc-pill tall"><span class="pnum">04</span><span class="pimg"><img src="assets/enhanced/heroes_masp-ai.png" alt=""></span><span class="plabel">Flexible Spaces at MASP</span></div>
+        </div>
+        <div class="toc-timeline"></div>
+        <div class="toc-row">
+          <div class="toc-num">01</div>
+          <div class="toc-title">The Terra Hotel</div>
+          <div class="toc-meta">Manhattan, New York</div>
+          <div class="toc-dots"></div>
+          <div class="toc-page">04</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">02</div>
+          <div class="toc-title">Liberty Rail Gardens</div>
+          <div class="toc-meta">Liberty State Park, New Jersey</div>
+          <div class="toc-dots"></div>
+          <div class="toc-page">10</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">03</div>
+          <div class="toc-title">Branch Brook Park Modern Art Gallery</div>
+          <div class="toc-meta">Newark, New Jersey</div>
+          <div class="toc-dots"></div>
+          <div class="toc-page">16</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">04</div>
+          <div class="toc-title">Flexible Spaces at MASP</div>
+          <div class="toc-meta">São Paulo, Brazil</div>
+          <div class="toc-dots"></div>
+          <div class="toc-page">21</div>
+        </div>
+        <svg class="toc-art" viewBox="0 0 312 270" aria-hidden="true">
+          <path class="wash" d="M45 220C70 164 115 183 132 122C147 68 206 75 245 30C267 5 301 16 312 25V270H0C4 244 20 232 45 220Z"/>
+          <path class="contour" d="M-8 246C37 207 75 233 100 192C132 138 167 169 194 115C220 61 263 82 319 21"/>
+          <path class="contour" d="M-11 258C41 220 84 250 113 205C145 156 181 184 209 132C235 84 272 101 322 50"/>
+          <path class="contour" d="M4 268C49 240 94 266 129 223C159 186 198 205 224 161C247 123 279 130 319 90"/>
+          <path class="accent" d="M53 233C88 192 108 209 132 166C159 116 195 142 218 96C239 54 273 68 302 35"/>
+          <path class="contour" d="M181 180V103L205 83V162M205 83L235 107V152M151 206V139L181 118"/>
+          <circle cx="181" cy="118" r="3" fill="#d76044"/>
+          <circle cx="235" cy="107" r="2.5" fill="#d89b43"/>
+        </svg>
+        <div class="toc-artwork" aria-label="Selected personal artwork by Varnika Duvvur">
+          <figure><img src="assets/artwork/forest-silhouette-ai.png" alt="Enhanced forest silhouette artwork"></figure>
+          <figure><img src="assets/artwork/cubist-portrait-ai.png" alt="Enhanced cubist portrait artwork"></figure>
+          <figure><img src="assets/artwork/dancer-ai.png" alt="Enhanced dancer artwork"></figure>
+        </div>
+      </div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Contents</span><span class="rr">03</span></div>
+  </section>
+
+  <!-- ============ PROJECT 01 : TERRA HOTEL ============ -->
+  <section class="page opener">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Architecture Portfolio</span></div>
+    <div class="content">
+      <div>
+        <div class="eyebrow">01 / ARCH 396 · Hospitality + Urban Agriculture</div>
+        <h2>The Terra Hotel</h2>
+        <div class="meta">Manhattan, New York<br>High-Rise Hotel<br>Floor Plans + Full Technical Set</div>
+        <div class="scalebar"><svg width="140" height="16" viewBox="0 0 140 16"><line x1="1" y1="8" x2="139" y2="8" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="1" y1="3" x2="1" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="35" y1="5" x2="35" y2="11" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="70" y1="3" x2="70" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="139" y1="3" x2="139" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/></svg><span class="scalebar-label">0&nbsp; 1&nbsp; 3&nbsp; 5</span></div>
+        <div class="statement">The Terra Hotel is a terrace-farming hotel that merges architecture with active food production. Guests do not simply stay at the property—they experience a working farm-to-table ecosystem.</div>
+      </div>
+      <div class="hero-frame"><img src="assets/enhanced/heroes_terra-ai.png" alt="The Terra Hotel in the Manhattan skyline"></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">The Terra Hotel</span><span class="rr">04</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">The Terra Hotel</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_terra-process-ai-restored.png" alt="Terra Hotel massing process"></div>
+      <div class="caption">
+        <div class="cap-row"><span class="cap-num">01</span><span class="cap-label">Massing Development</span></div>
+      </div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">The Terra Hotel</span><span class="rr">05</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">The Terra Hotel</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_terra-section-ai-v2.png" alt="Terra Hotel building section with softly faded sky"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">02</span><span class="cap-label">Building Section</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">The Terra Hotel</span><span class="rr">06</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">The Terra Hotel</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_terra-details-ai.png" alt="Terra Hotel technical details"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">03</span><span class="cap-label">Curtain Wall and Green Roof Details</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">The Terra Hotel</span><span class="rr">07</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">The Terra Hotel</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_terra-plans-ai.png" alt="Terra Hotel floor plans"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">04</span><span class="cap-label">Floor Plans</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">The Terra Hotel</span><span class="rr">08</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">The Terra Hotel</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_terra-elevation-ai.png" alt="Terra Hotel elevation and street views"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">05</span><span class="cap-label">Elevation and Serial Views</span></div></div>
+      <div class="reflect"><span class="mark">—</span><p>Can a hotel feed the city it stands in?</p></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">The Terra Hotel</span><span class="rr">09</span></div>
+  </section>
+
+  <!-- ============ PROJECT 02 : LIBERTY RAIL GARDENS ============ -->
+  <section class="page opener wide-hero">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Architecture Portfolio</span></div>
+    <div class="content">
+      <div class="wide-head">
+        <div>
+          <div class="eyebrow">02 / ARCH 495 · Ecological Civic Space</div>
+          <h2>Liberty Rail Gardens</h2>
+        </div>
+        <div class="wide-meta-block">
+          <div class="meta">Liberty State Park, New Jersey<br>Landscape + Civic Pavilion<br>UDIA, SDA + ASE Analysis</div>
+          <div class="scalebar"><svg width="140" height="16" viewBox="0 0 140 16"><line x1="1" y1="8" x2="139" y2="8" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="1" y1="3" x2="1" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="35" y1="5" x2="35" y2="11" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="70" y1="3" x2="70" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="139" y1="3" x2="139" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/></svg><span class="scalebar-label">0&nbsp; 1&nbsp; 3&nbsp; 5</span></div>
+        </div>
+      </div>
+      <div class="statement">Rooted in the ecological and maritime history of Liberty State Park and the neighboring Communipaw settlement, this project reintroduces indigenous plant and aquatic species through programmed pavilions, aquaponic farms, and exhibition spaces. The building's undulating façade traces water and human movement, while five funnel elements punctuate the roof — metaphorical stones breaking a river's current.</div>
+      <div class="hero-frame wide"><img src="assets/enhanced/liberty-elevation-ai.png" alt="Panoramic elevation of Liberty Rail Gardens against the Manhattan skyline and historic Communipaw terminal"></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Liberty Rail Gardens</span><span class="rr">10</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Liberty Rail Gardens</span></div>
+    <div class="content two-panel">
+      <div class="panel">
+        <div class="panel-label">Program Diagram</div>
+        <div class="panel-img"><img src="assets/enhanced/liberty-concept-full-ai.png" alt="Program bubble diagram — eat, buy, play, learn, grow, sell, funnel — with concept keywords"></div>
+      </div>
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-label">Massing Iterations</div>
+          <div class="panel-img"><img src="assets/enhanced/liberty-iterations-ai.png" alt="Four massing iteration studies in plan"></div>
+        </div>
+        <div class="panel small">
+          <div class="panel-label">Site Context</div>
+          <div class="panel-img"><img src="assets/enhanced/heroes_liberty-photo-ai.png" alt="Liberty State Park waterfront with the Manhattan skyline" style="mix-blend-mode:normal;"></div>
+        </div>
+      </div>
+      <div class="caption">
+        <div class="cap-row"><span class="cap-num">01</span><span class="cap-label">Program and Massing Development</span></div>
+      </div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Liberty Rail Gardens</span><span class="rr">11</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Liberty Rail Gardens</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_liberty-precedents-ai.png" alt="Liberty Rail Gardens precedent studies"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">02</span><span class="cap-label">Precedent Studies</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Liberty Rail Gardens</span><span class="rr">12</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Liberty Rail Gardens</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/liberty-aerial-ai.png" alt="Axonometric view of the final resolved building form"></div>
+      <div class="caption">
+        <div class="cap-row"><span class="cap-num">03</span><span class="cap-label">Final Form</span></div>
+        <div class="cap-quote">One resolved form.</div>
+      </div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Liberty Rail Gardens</span><span class="rr">13</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Liberty Rail Gardens</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_liberty-plan-ai.png" alt="Liberty Rail Gardens floor plan"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">04</span><span class="cap-label">Floor Plan</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Liberty Rail Gardens</span><span class="rr">14</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Liberty Rail Gardens</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_liberty-environment-ai.png" alt="Liberty Rail Gardens environmental studies"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">05</span><span class="cap-label">Environmental and Daylighting Analysis</span></div></div>
+      <div class="reflect"><span class="mark">—</span><p>What remains when architecture learns to yield to water?</p></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Liberty Rail Gardens</span><span class="rr">15</span></div>
+  </section>
+
+  <!-- ============ PROJECT 03 : BRANCH BROOK PARK GALLERY ============ -->
+  <section class="page opener">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Architecture Portfolio</span></div>
+    <div class="content">
+      <div>
+        <div class="eyebrow">03 / ARCH 296 · Adaptive Reuse</div>
+        <h2>Branch Brook Park Modern Art Gallery</h2>
+        <div class="meta">Newark, New Jersey<br>Gallery + Landscape<br>Full Construction-Document Set</div>
+        <div class="scalebar"><svg width="140" height="16" viewBox="0 0 140 16"><line x1="1" y1="8" x2="139" y2="8" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="1" y1="3" x2="1" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="35" y1="5" x2="35" y2="11" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="70" y1="3" x2="70" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="139" y1="3" x2="139" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/></svg><span class="scalebar-label">0&nbsp; 1&nbsp; 3&nbsp; 5</span></div>
+        <div class="statement">Located within Frederick Law Olmsted's Branch Brook Park, the project reactivates the historic High Mound—a site that once overlooked a statuary garden and reservoir—while preserving its remaining brownstone walls and spatial legacy.</div>
+      </div>
+      <div class="hero-frame"><img src="assets/enhanced/heroes_branch-ai.png" alt="Branch Brook Park Modern Art Gallery rendering"></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Branch Brook Park Gallery</span><span class="rr">16</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Branch Brook Park Gallery</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_branch-analysis-ai.png" alt="Branch Brook Park Gallery analysis diagrams"></div>
+      <div class="caption">
+        <div class="cap-row"><span class="cap-num">01</span><span class="cap-label">Site and Circulation Analysis</span></div>
+      </div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Branch Brook Park Gallery</span><span class="rr">17</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Branch Brook Park Gallery</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_branch-plans-ai.png" alt="Branch Brook Park Gallery plans"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">02</span><span class="cap-label">Floor Plans</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Branch Brook Park Gallery</span><span class="rr">18</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Branch Brook Park Gallery</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_branch-sections-ai.png" alt="Branch Brook Park Gallery sections"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">03</span><span class="cap-label">Sections</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Branch Brook Park Gallery</span><span class="rr">19</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Branch Brook Park Gallery</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_branch-elevations-ai.png" alt="Branch Brook Park Gallery elevations"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">04</span><span class="cap-label">Elevations and Interior Views</span></div></div>
+      <div class="reflect"><span class="mark">—</span><p>How does a new structure carry the memory of the ground it stands on?</p></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Branch Brook Park Gallery</span><span class="rr">20</span></div>
+  </section>
+
+  <!-- ============ PROJECT 04 : FLEXIBLE SPACES AT MASP ============ -->
+  <section class="page opener">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Architecture Portfolio</span></div>
+    <div class="content">
+      <div>
+        <div class="eyebrow">04 / ARCH 361 · Flexible Museum Systems</div>
+        <h2>Flexible Spaces at MASP</h2>
+        <div class="meta">São Paulo, Brazil<br>Adaptive Reuse<br>Modular Foldable-Wall System</div>
+        <div class="scalebar"><svg width="140" height="16" viewBox="0 0 140 16"><line x1="1" y1="8" x2="139" y2="8" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="1" y1="3" x2="1" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="35" y1="5" x2="35" y2="11" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="70" y1="3" x2="70" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/><line x1="139" y1="3" x2="139" y2="13" style="stroke:var(--ink);stroke-width:1;opacity:.55"/></svg><span class="scalebar-label">0&nbsp; 1&nbsp; 3&nbsp; 5</span></div>
+        <div class="statement">This adaptive reuse proposal transforms MASP's iconic open volume into a visitor-responsive environment. Movable and foldable panels generate temporary rooms, private corners, and exhibition surfaces without structural intervention.</div>
+      </div>
+      <div class="hero-frame"><img src="assets/enhanced/heroes_masp-ai.png" alt="Flexible spaces proposal for the São Paulo Museum of Art"></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Flexible Spaces at MASP</span><span class="rr">21</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Flexible Spaces at MASP</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_masp-exploded-ai.png" alt="MASP exploded façade and railing system"></div>
+      <div class="caption">
+        <div class="cap-row"><span class="cap-num">01</span><span class="cap-label">Exploded Façade and Railing System</span></div>
+      </div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Flexible Spaces at MASP</span><span class="rr">22</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Flexible Spaces at MASP</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_masp-walls-ai.png" alt="MASP foldable wall systems"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">02</span><span class="cap-label">Foldable and Modular Wall Systems</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Flexible Spaces at MASP</span><span class="rr">23</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Flexible Spaces at MASP</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_masp-softwall-ai.png" alt="MASP softwall accordion system"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">03</span><span class="cap-label">Softwall Accordion System</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Flexible Spaces at MASP</span><span class="rr">24</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Flexible Spaces at MASP</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_masp-configurations-ai.png" alt="MASP spatial configurations"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">04</span><span class="cap-label">Spatial Configurations</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Flexible Spaces at MASP</span><span class="rr">25</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Flexible Spaces at MASP</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_masp-section-a-ai.png" alt="MASP longitudinal section"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">05</span><span class="cap-label">Longitudinal Section</span></div></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Flexible Spaces at MASP</span><span class="rr">26</span></div>
+  </section>
+
+  <section class="page detail">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <div class="runhead-line"></div>
+    <div class="runhead"><span class="rl">Varnika Duvvur</span><span class="rr">Flexible Spaces at MASP</span></div>
+    <div class="content">
+      <div class="img-frame"><img src="assets/enhanced/portfolio_masp-section-b-ai.png" alt="MASP building section"></div>
+      <div class="caption"><div class="cap-row"><span class="cap-num">06</span><span class="cap-label">Building Section</span></div></div>
+      <div class="reflect"><span class="mark">—</span><p>How many ways can one room become another?</p></div>
+    </div>
+    <div class="runfoot-line"></div>
+    <div class="runfoot"><span class="rl">Flexible Spaces at MASP</span><span class="rr">27</span></div>
+  </section>
+
+  <!-- 28 : CLOSING -->
+  <section class="page dark end-page" id="closing">
+    <svg class="regmarks" viewBox="0 0 1056 816"><g transform="translate(22,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,22)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(22,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g><g transform="translate(1034,794)"><path d="M-8,0H8M0,-8V8"/><circle r="2"/></g></svg>
+    <svg class="end-art" viewBox="0 0 1056 816" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M446 64C548 128 491 246 610 294C728 341 665 468 807 511C900 540 908 645 1013 702"/>
+      <path d="M423 104C533 158 487 271 589 321C696 373 646 490 779 539C868 572 886 663 985 732"/>
+      <path class="accent" d="M474 37C577 111 519 225 638 271C759 318 694 437 838 483"/>
+      <path d="M650 74V184M622 129H678M805 600V714M774 657H836"/>
+    </svg>
+    <div class="end-gallery" aria-label="Selected personal architectural artwork">
+      <figure><img src="assets/artwork/castle-ai.png" alt="Enhanced fantasy castle painting"></figure>
+      <figure><img src="assets/artwork/eiffel-ai.png" alt="Enhanced Eiffel Tower painting"></figure>
+      <figure><img src="assets/artwork/burj-khalifa-ai.png" alt="Enhanced Burj Khalifa painting"></figure>
+      <figure><img src="assets/artwork/blue-flowers-ai.png" alt="Enhanced blue flower painting"></figure>
+    </div>
+    <div class="end-art-label">Selected personal artwork</div>
+    <div class="end-copy">
+      <div class="end-kicker">Varnika Duvvur / Architecture Portfolio 2026</div>
+      <h2>Thank<br><em>you.</em></h2>
+      <p class="end-note">I design for what a place remembers, what people need now, and what change may ask of it next.</p>
+      <div class="end-contact">
+        <div><strong>Let us connect</strong>varnikaduvvur1133@gmail.com</div>
+        <div><strong>Bachelor of Architecture</strong>New Jersey Institute of Technology / 2026</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
